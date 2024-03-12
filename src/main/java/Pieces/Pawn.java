@@ -21,18 +21,18 @@ public class Pawn extends Piece {
         // and choosing which move
         if (c == 'w') {
             int[][] m = new int[][]{
-                    {0, 1},
-                    {0, 2},
-                    {-1, 1},
-                    {1, 1}
+                    {1, 0},
+                    {2, 0},
+                    {1, 1},
+                    {1, -1}
             };
             super.setMove(m);
         } else if (c == 'b') {
             int[][] m = new int[][]{
-                    {0, -1},
-                    {0, -2},
-                    {-1, -1},
-                    {1, -1}
+                    {-1, 0},
+                    {-2, 0},
+                    {-1, 1},
+                    {-1, -1}
             };
             super.setMove(m);
         }
