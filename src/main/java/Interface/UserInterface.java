@@ -3,8 +3,10 @@ package Interface;
 import BoardAndGameLogic.*;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -39,9 +41,11 @@ public class UserInterface extends Application {
                 Rectangle r = new Rectangle(s, s, s, s);
                 // Clickable action rectangles
                 Rectangle r2 = new Rectangle(s, s, s, s);
+
                 // Getting the current case from the board
-                String caseName = board.getCases()[i][j].getName();
                 Case currentCase = board.getCases()[i][j];
+                String caseName = currentCase.getName();
+                Label nameCase = new Label(caseName);
                 r2.setId(caseName);
                 // Mouse clicked event
                 r2.setOnMouseClicked(
@@ -59,7 +63,8 @@ public class UserInterface extends Application {
                 else
                     r.setFill(Color.rgb(118,150,86));
                 // Adding the color rectangles in the GridPane
-                grid.add(r, i , j);
+                grid.add(r, j , i);
+                grid.add(nameCase, j, i);
                 // Adding the Piece image
                 if(currentCase.getPiece() != null) {
                     Image img = new Image(currentCase.getPiece().getImage());
@@ -67,12 +72,12 @@ public class UserInterface extends Application {
                     imgView.setVisible(true);
                     imgView.fitWidthProperty().bind(r.widthProperty().subtract(2));
                     imgView.fitHeightProperty().bind(r.heightProperty().subtract(2));
-                    grid.add(imgView, i, j);
+                    grid.add(imgView, j, i);
                 }
                 // Filling the action rectangles transparent
                 r2.setFill(Color.TRANSPARENT);
                 // Adding the action rectangles to the GridPane
-                grid.add(r2, i, j);
+                grid.add(r2, j, i);
                 count++;
             }
         }
