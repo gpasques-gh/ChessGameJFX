@@ -12,7 +12,6 @@ public abstract class Piece {
     private final String name;
     private final char color;
     private final String image;
-    private int[][] move;
 
     /***
      * Piece constructor
@@ -23,14 +22,6 @@ public abstract class Piece {
         name = n;
         color = c;
         image = i;
-    }
-
-    /***
-     * getMove method
-     * @return move array of the Piece
-     */
-    public int[][] getMove() {
-        return move;
     }
 
     /***
@@ -55,14 +46,5 @@ public abstract class Piece {
      */
     public String getImage() {
         return image;
-    }
-
-    /***
-     * setMove method
-     * setting the move array
-     * @param m move array
-     */
-    public void setMove(int[][] m) {
-        move = m;
     }
 }

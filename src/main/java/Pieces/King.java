@@ -19,20 +19,6 @@ public class King extends Piece {
     public King(String n, char c, String i) {
         // Calling Piece constructor
         super(n, c, i);
-
-        // Creating the move array
-        int[][] m = new int[][]{
-                {0, 1},
-                {0, -1},
-                {1, 1},
-                {1, -1},
-                {1, 0},
-                {-1, -1},
-                {-1, 0},
-                {-1, 1}
-        };
-        super.setMove(m);
-
         hasMoved = false;
         checked = false;
     }

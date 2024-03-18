@@ -1,7 +1,6 @@
 package BoardAndGameLogic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import Pieces.*;
 
 public class Game {
@@ -13,11 +12,11 @@ public class Game {
      * playerMoveCases array
      * check boolean
      */
-    private Board board;
-    private ArrayList<Case> playerMoveCases;
+    private final Board board;
+    private final ArrayList<Case> playerMoveCases;
     private ArrayList<ArrayList<Case>> possibleMoves;
     private char turn;
-    private boolean check;
+    //private boolean check;
 
     /***
      * Game constructor
@@ -56,8 +55,7 @@ public class Game {
         // Variables
         possibleMoves = new ArrayList<>(); // Moves
         Case[][] cases = board.getCases(); // Board
-        Case c1, c2; // Cases
-        int i1, j1; // Indexes for movement
+        Case c1;
         Piece piece;
         // Going through the board for Pieces
         for (int i = 0; i < 8; i++) {
@@ -66,123 +64,291 @@ public class Game {
                 piece = c1.getPiece(); // First case Piece
                 if (piece != null && piece.getColor() == turn) {
                     // Going through the move array
-                    for (int[] move : piece.getMove()) {
-                        i1 = i + move[1]; // Adding the row movement
-                        j1 = j + move[0]; // Adding the column movement
-                        if (i1 > -1 && i1 < 8 && j1 > -1 && j1 < 8) {
-                            c2 = cases[i1][j1]; // Second case
-                            if (isValidMove(piece, c1, c2)) {
-                                // Adding the move to the ArrayList
-                                ArrayList<Case> moveArrList = new ArrayList<>();
-                                moveArrList.add(c1);
-                                moveArrList.add(c2);
-                                possibleMoves.add(moveArrList);
-                            }
-                        }
-                    }
+                    possibleMovesPieces(piece, i, j);
                 }
             }
         }
     }
 
-    public boolean isValidMove(Piece piece, Case c1, Case c2) {
-        boolean isValidMove = false;
+    public void possibleMovesPieces(Piece piece, int row, int col) {
         if (piece instanceof Pawn)
-            isValidMove = pawnMove(c1, c2);
+            pawnMove(piece, row, col);
+        else if (piece instanceof Rook)
+            rookMove(piece, row, col);
         else if (piece instanceof Night)
-            isValidMove = nightMove(c1, c2);
+            nightMove(piece, row, col);
         else
             resetPlayerMove();
-        return isValidMove;
+    }
+
+    public void addMove(Case c1, Case c2) {
+        ArrayList<Case> arrayList = new ArrayList<>();
+        arrayList.add(c1);
+        arrayList.add(c2);
+        possibleMoves.add(arrayList);
     }
 
     /***
      * pawnMove method
      * handle the pawn movements
      */
-    public boolean pawnMove(Case c1, Case c2) {
-        boolean isValidMove = false;
+    public void pawnMove(Piece piece, int row, int col) {
+        Case[][] cases = board.getCases();
+        Case currentCase = cases[row][col];
         // Get the two movement cases
         // Get the pawn
-        Pawn pawn = (Pawn) c1.getPiece();
-        // Get the second case piece
-        Piece piece = c2.getPiece();
-        // Get movement arrays
-        int[][] pawnMoves = pawn.getMove();
-        int[] playerMoveDiff = new int[]{
-                c1.getColIndex() - c2.getColIndex(),
-                c1.getRowIndex() - c2.getRowIndex()
-        };
+        Pawn pawn = (Pawn) piece;
 
-        // Conditions & Logic
-        if (piece == null) { // If the piece on the second case is null
-            // If the case is one row above or below
-            if (Arrays.equals(playerMoveDiff, pawnMoves[0]))
-                isValidMove = true; // Moving the pawn
-                // If the case is two rows above or below and the pawn hasn't moved yet
-            else if (!pawn.getMoved() && Arrays.equals(playerMoveDiff, pawnMoves[1]))
-                isValidMove = true; // Moving the pawn
-        } else { // If the piece on the second case isn't null
-            // If the colors don't match and the case is one row above/below and one column to the right
-            if (pawn.getColor() != piece.getColor() && Arrays.equals(playerMoveDiff, pawnMoves[2]))
-                isValidMove = true; // Moving the pawn
-                // If the colors don't match and the case is one row above/below and one column to the left
-            else if (pawn.getColor() != piece.getColor() && Arrays.equals(playerMoveDiff, pawnMoves[3]))
-                isValidMove = true; // Moving the pawn
+        // If the pawn is white
+        if (piece.getColor() == 'w') {
+            // If it can move forward
+            if (row-1 >=  0) {
+                // If the case is empty
+                if (cases[row-1][col].getPiece()==null) {
+                    // Add the move to the possible move ArrayList
+                    addMove(currentCase, cases[row-1][col]);
+                }
+
+                // If the pawn hasn't moved yet
+                if (!pawn.getMoved()) {
+                    // If both the first and second cases are empty
+                    if (cases[row-1][col].getPiece()==null && cases[row-2][col].getPiece()==null) {
+                        // Add the move to the possible move ArrayList
+                        addMove(currentCase, cases[row-2][col]);
+                    }
+                }
+
+                // If it can move left
+                if (col-1 >= 0) {
+                    // Get the piece on the case
+                    Piece secondPiece = cases[row-1][col-1].getPiece();
+                    // If the piece isn't null and is black
+                    if (secondPiece != null && secondPiece.getColor() != 'w') {
+                        // Add the move to the possible move ArrayList
+                        addMove(currentCase, cases[row-1][col-1]);
+                    }
+                }
+
+                // If it can move right
+                if (col+1 < cases.length) {
+                    // Get the piece on the case
+                    Piece secondPiece = cases[row-1][col+1].getPiece();
+                    // If the piece isn't null and is black
+                    if (secondPiece != null && secondPiece.getColor() != 'w') {
+                        // Add the move to the possible move ArrayList
+                        addMove(currentCase, cases[row-1][col+1]);
+                    }
+                }
+            }
+        } else { // If the pawn is black
+            // If it can move forward
+            if (row+1 < cases.length) {
+                // If the case is empty
+                if (cases[row+1][col].getPiece()==null) {
+                    // Add the move to the possible move ArrayList
+                    addMove(currentCase, cases[row-1][col]);
+                }
+
+                // If the pawn hasn't moved yet
+                if (!pawn.getMoved()) {
+                    // If both the first and second cases are empty
+                    if (cases[row+1][col].getPiece()==null && cases[row+2][col].getPiece()==null) {
+                        // Add the move to the possible move ArrayList
+                        addMove(currentCase, cases[row+2][col]);
+                    }
+                }
+
+                // If it can move left
+                if (col-1 >= 0) {
+                    // Get the piece on the case
+                    Piece secondPiece = cases[row+1][col-1].getPiece();
+                    // If the piece isn't null and is white
+                    if (secondPiece != null && secondPiece.getColor() != 'b') {
+                        // Add the move to the possible move ArrayList
+                        addMove(currentCase, cases[row+1][col-1]);
+                    }
+                }
+
+                // If it can move right
+                if (col+1 < cases.length) {
+                    // Get the piece on the case
+                    Piece secondPiece = cases[row+1][col+1].getPiece();
+                    // If the piece isn't null and is white
+                    if (secondPiece != null && secondPiece.getColor() != 'b') {
+                        // Add the move to the possible move ArrayList
+                        addMove(currentCase, cases[row+1][col+1]);
+                    }
+                }
+            }
         }
-        // Checking if the pawn moved
-        return isValidMove;
     }
 
     /***
      * nightMove method
      * handle the Night movements
      */
-    public boolean nightMove(Case c1, Case c2) {
-        boolean isValidMove = false;
-        // Get the Night
-        Night night = (Night) c1.getPiece();
-        // Get the second case piece
-        Piece piece = c2.getPiece();
-        // Get movement arrays
-        int[][] nightMoves = night.getMove();
-        int[] playerMoveDiff = new int[]{
-                c1.getColIndex() - c2.getColIndex(),
-                c1.getRowIndex() - c2.getRowIndex()
-        };
+    public void nightMove(Piece piece, int row, int col) {
+        Case[][] cases = board.getCases(); // Get the board
+        Case currentCase = cases[row][col]; // Get the current case
+        Night night = (Night)piece; // Get the Night
 
-        // Conditions & Logic
-        for (int[] move : nightMoves) // Going through the moves
-            if (Arrays.equals(playerMoveDiff, move)) // If the player move is valid
-                if (piece == null) // If the piece is null
-                    isValidMove = true; // Move the Night
-                else if (piece.getColor() != night.getColor()) // Else if the piece is of an opposite color
-                    isValidMove = true; // Move the Night
+        // Test on the case two rows below and one column right
+        if (row + 2 < cases.length && col + 1 < cases.length) {
+            if (cases[row+2][col+1].getPiece() == null) { // If it's empty
+                addMove(currentCase, cases[row+2][col+1]); // Add it to the moves
+            // If the piece is opposite color
+            } else if (cases[row+2][col+1].getPiece().getColor() != night.getColor()) {
+                addMove(currentCase, cases[row+2][col+1]); // Add it to the moves
+            }
+        }
 
-        return isValidMove;
+        // Test on the case two rows below and one column left
+        if (row + 2 < cases.length && col - 1 >= 0) {
+            if (cases[row+2][col-1].getPiece() == null) { // If it's empty
+                addMove(currentCase, cases[row+2][col-1]); // Add it to the moves
+            // If the piece is opposite color
+            } else if (cases[row+2][col-1].getPiece().getColor() != night.getColor()) {
+                addMove(currentCase, cases[row+2][col-1]); // Add it to the moves
+            }
+        }
+
+        // Test on the case two rows above and one column right
+        if (row - 2 >= 0 && col + 1 < cases.length) {
+            if (cases[row-2][col+1].getPiece() == null) { // If it's empty
+                addMove(currentCase, cases[row-2][col+1]); // Add it to the moves
+                // If the piece is opposite color
+            } else if (cases[row-2][col+1].getPiece().getColor() != night.getColor()) {
+                addMove(currentCase, cases[row-2][col+1]); // Add it to the moves
+            }
+        }
+
+        // Test on the case two rows above and one column left
+        if (row - 2 >= 0 && col - 1 >= 0) {
+            if (cases[row-2][col-1].getPiece() == null) { // If it's empty
+                addMove(currentCase, cases[row-2][col-1]); // Add it to the moves
+            // If the piece is opposite color
+            } else if (cases[row-2][col-1].getPiece().getColor() != night.getColor()) {
+                addMove(currentCase, cases[row-2][col-1]); // Add it to the moves
+            }
+        }
+
+        // Test on the case one row above and two column right
+        if (row - 1 >= 0 && col + 2 < cases.length) {
+            if (cases[row-1][col+2].getPiece() == null) { // If it's empty
+                addMove(currentCase, cases[row-1][col+2]); // Add it to the moves
+                // If the piece is opposite color
+            } else if (cases[row-1][col+2].getPiece().getColor() != night.getColor()) {
+                addMove(currentCase, cases[row-1][col+2]); // Add it to the moves
+            }
+        }
+
+        // Test on the case one row above and two column right
+        if (row + 1 < cases.length && col + 2 < cases.length) {
+            if (cases[row+1][col+2].getPiece() == null) { // If it's empty
+                addMove(currentCase, cases[row+1][col+2]); // Add it to the moves
+                // If the piece is opposite color
+            } else if (cases[row+1][col+2].getPiece().getColor() != night.getColor()) {
+                addMove(currentCase, cases[row+1][col+2]); // Add it to the moves
+            }
+        }
+
+        // Test on the case one row above and two column left
+        if (row - 1 >= 0 && col - 2 >= 0) {
+            if (cases[row-1][col-2].getPiece() == null) { // If it's empty
+                addMove(currentCase, cases[row-1][col-2]); // Add it to the moves
+                // If the piece is opposite color
+            } else if (cases[row-1][col-2].getPiece().getColor() != night.getColor()) {
+                addMove(currentCase, cases[row-1][col-2]); // Add it to the moves
+            }
+        }
+
+        // Test on the case one row above and two column left
+        if (row + 1 < cases.length && col - 2 >= 0) {
+            if (cases[row+1][col-2].getPiece() == null) { // If it's empty
+                addMove(currentCase, cases[row+1][col-2]); // Add it to the moves
+                // If the piece is opposite color
+            } else if (cases[row+1][col-2].getPiece().getColor() != night.getColor()) {
+                addMove(currentCase, cases[row+1][col-2]); // Add it to the moves
+            }
+        }
     }
 
-//    public boolean rookMove(Case c1, Case c2) {
-//        boolean isValidMove = false;
-//        boolean isStopped = false;
-//        Rook rook = (Rook)c1.getPiece();
-//        Piece piece = c2.getPiece();
-//        int i = 0;
-//        int j = 0;
-//        int[][] rookMoves = rook.getMove();
-//        int[] moveDiff = new int[]{
-//                c1.getColIndex() - c2.getColIndex(),
-//                c1.getRowIndex() - c2.getRowIndex()
-//        };
-//
-//        while (!isStopped && i < rookMoves.length) {
-//            j = Math.max(, moveDiff[1]);
-//            while (j > 0) {
-//
-//            }
-//        }
-//    }
-//
+    public void rookMove(Piece piece, int row, int col) {
+        Case[][] cases = board.getCases();
+        Case currentCase = cases[row][col];
+        Rook rook = (Rook)piece;
+        int r1 = row + 1;
+        int c1 = col;
+
+        // Going to the top of the board:
+        while (r1 < cases.length) {
+            // If the piece on the case is null
+            if (cases[r1][c1].getPiece() == null) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the moves
+                r1++; // Increment the row
+            // If it's opposite color
+            } else if (cases[r1][c1].getPiece().getColor() != rook.getColor()) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the move
+                break; // Then stop
+            // If it's allied piece
+            } else {
+                break; // Stop
+            }
+        }
+
+        // Going to the bottom of the board:
+        r1 = row - 1;
+        while (r1 >= 0) {
+            // If the piece on the case is null
+            if (cases[r1][c1].getPiece() == null) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the moves
+                r1--; // Decrement the row
+            // If it's opposite color
+            } else if (cases[r1][c1].getPiece().getColor() != rook.getColor()) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the move
+                break; // Then stop
+            // If it's allied piece
+            } else {
+                break; // Stop
+            }
+        }
+
+        // Going to the right of the board:
+        r1 = row;
+        c1 = col + 1;
+        while (c1 < cases.length) {
+            // If the piece on the case is null
+            if (cases[r1][c1].getPiece() == null) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the moves
+                c1++;
+            // If it's opposite color
+            } else if (cases[r1][c1].getPiece().getColor() != rook.getColor()) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the moves
+                break; // Then stop
+            // If it's allied piece
+            } else {
+                break; // Stop
+            }
+        }
+
+        // Going to the left of the board:
+        c1 = col - 1;
+        while (c1 >= 0) {
+            // If the piece on the case is null
+            if (cases[r1][c1].getPiece() == null) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the moves
+                c1--; // Decrement the row
+                // If it's opposite color
+            } else if (cases[r1][c1].getPiece().getColor() != rook.getColor()) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the move
+                break; // Then stop
+                // If it's allied piece
+            } else {
+                break; // Stop
+            }
+        }
+    }
+
 //    public void kingMove() {
 //
 //        // Get the two movement cases
