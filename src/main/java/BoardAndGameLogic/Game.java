@@ -38,19 +38,35 @@ public class Game {
         System.out.println(s);
         // Get indexes of the case
         // Adding the case and indexes to the move arrays
-        if (playerMoveCases.isEmpty()) {
-            playerMoveCases.add(c);
-        } else {
-            playerMoveCases.add(c);
-            // Checking Piece type and moving accordingly
-            if (possibleMoves.contains(playerMoveCases)) {
-                movePiece(playerMoveCases.get(0), playerMoveCases.get(1));
+        if (c.getPiece() != null) {
+            if (playerMoveCases.isEmpty()) {
+                playerMoveCases.add(c);
             } else {
-                resetPlayerMove();
+                playerMoveCases.add(c);
+                // Checking Piece type and moving accordingly
+                if (possibleMoves.contains(playerMoveCases)) {
+                    movePiece(playerMoveCases.get(0), playerMoveCases.get(1));
+                } else {
+                    resetPlayerMove();
+                }
+            }
+        } else {
+            if (playerMoveCases.size() == 1) {
+                playerMoveCases.add(c);
+                // Checking Piece type and moving accordingly
+                if (possibleMoves.contains(playerMoveCases)) {
+                    movePiece(playerMoveCases.get(0), playerMoveCases.get(1));
+                } else {
+                    resetPlayerMove();
+                }
             }
         }
     }
 
+    /***
+     * generatePossibleMoves method
+     * generate all the possible moves
+     */
     public void generatePossibleMoves() {
         // Variables
         possibleMoves = new ArrayList<>(); // Moves
@@ -70,6 +86,13 @@ public class Game {
         }
     }
 
+    /***
+     * possibleMovesPieces method
+     * test which types the Piece is
+     * @param piece the piece to be tested
+     * @param row the row where the piece is situated
+     * @param col the column where the piece is situated
+     */
     public void possibleMovesPieces(Piece piece, int row, int col) {
         if (piece instanceof Pawn)
             pawnMove(piece, row, col);
@@ -77,20 +100,33 @@ public class Game {
             rookMove(piece, row, col);
         else if (piece instanceof Night)
             nightMove(piece, row, col);
+        else if (piece instanceof Bishop)
+            bishopMove(piece, row, col);
         else
             resetPlayerMove();
     }
 
+    /***
+     * addMove method
+     * add the two cases to an ArrayList<Case>
+     * then add the ArrayList to the possible moves ArrayList
+     * @param c1 first case
+     * @param c2 second case
+     */
     public void addMove(Case c1, Case c2) {
+        // Create the ArrayList
         ArrayList<Case> arrayList = new ArrayList<>();
-        arrayList.add(c1);
-        arrayList.add(c2);
-        possibleMoves.add(arrayList);
+        arrayList.add(c1); // Adding the first case
+        arrayList.add(c2); // Adding the second case
+        possibleMoves.add(arrayList); // Add the ArrayList to the possible moves ArrayList
     }
 
     /***
      * pawnMove method
-     * handle the pawn movements
+     * generate all the pawn possible moves
+     * @param piece the pawn
+     * @param row the row where the pawn is situated
+     * @param col the column where the pawn is situated
      */
     public void pawnMove(Piece piece, int row, int col) {
         Case[][] cases = board.getCases();
@@ -145,8 +181,9 @@ public class Game {
             if (row+1 < cases.length) {
                 // If the case is empty
                 if (cases[row+1][col].getPiece()==null) {
+                    System.out.println("test");
                     // Add the move to the possible move ArrayList
-                    addMove(currentCase, cases[row-1][col]);
+                    addMove(currentCase, cases[row+1][col]);
                 }
 
                 // If the pawn hasn't moved yet
@@ -185,7 +222,10 @@ public class Game {
 
     /***
      * nightMove method
-     * handle the Night movements
+     * generate all the night possible moves
+     * @param piece the night
+     * @param row the row where the night is situated
+     * @param col the column where the night is situated
      */
     public void nightMove(Piece piece, int row, int col) {
         Case[][] cases = board.getCases(); // Get the board
@@ -273,6 +313,13 @@ public class Game {
         }
     }
 
+    /***
+     * rookMove method
+     * generate all the rook possible moves
+     * @param piece the rook
+     * @param row the row where the rook is situated
+     * @param col the column where the rook is situated
+     */
     public void rookMove(Piece piece, int row, int col) {
         Case[][] cases = board.getCases();
         Case currentCase = cases[row][col];
@@ -349,6 +396,96 @@ public class Game {
         }
     }
 
+    /***
+     * bishopMove method
+     * generate all the bishop possible moves
+     * @param piece the bishop
+     * @param row the row where the bishop is situated
+     * @param col the column where the bishop is situated
+     */
+    public void bishopMove(Piece piece, int row, int col) {
+        Case[][] cases = board.getCases();
+        Case currentCase = cases[row][col];
+        Bishop bishop = (Bishop)piece;
+        int r1 = row + 1;
+        int c1 = col + 1;
+
+        // Going to the top of the board:
+        while (r1 < cases.length && c1 < cases.length) {
+            // If the piece on the case is null
+            if (cases[r1][c1].getPiece() == null) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the moves
+                r1++; // Increment the row
+                c1++; // Increment the column
+                // If it's opposite color
+            } else if (cases[r1][c1].getPiece().getColor() != bishop.getColor()) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the move
+                break; // Then stop
+                // If it's allied piece
+            } else {
+                break; // Stop
+            }
+        }
+
+        // Going to the bottom of the board:
+        r1 = row - 1;
+        c1 = col + 1;
+        while (r1 >= 0 && c1 < cases.length) {
+            // If the piece on the case is null
+            if (cases[r1][c1].getPiece() == null) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the moves
+                r1--; // Decrement the row
+                c1++; // Increment the column
+                // If it's opposite color
+            } else if (cases[r1][c1].getPiece().getColor() != bishop.getColor()) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the move
+                break; // Then stop
+                // If it's allied piece
+            } else {
+                break; // Stop
+            }
+        }
+
+        // Going to the right of the board:
+        r1 = row + 1;
+        c1 = col - 1;
+        while (r1 < cases.length && c1 >= 0) {
+            // If the piece on the case is null
+            if (cases[r1][c1].getPiece() == null) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the moves
+                r1++; // Increment the row
+                c1--; // Decrement the column
+                // If it's opposite color
+            } else if (cases[r1][c1].getPiece().getColor() != bishop.getColor()) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the moves
+                break; // Then stop
+                // If it's allied piece
+            } else {
+                break; // Stop
+            }
+        }
+
+        // Going to the left of the board:
+        r1 = row - 1;
+        c1 = col - 1;
+        while (r1 >= 0 && c1 >= 0) {
+            // If the piece on the case is null
+            if (cases[r1][c1].getPiece() == null) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the moves
+                r1--; // Decrement the row
+                c1--; // Decrement the column
+                // If it's opposite color
+            } else if (cases[r1][c1].getPiece().getColor() != bishop.getColor()) {
+                addMove(currentCase, cases[r1][c1]); // Add it to the move
+                break; // Then stop
+                // If it's allied piece
+            } else {
+                break; // Stop
+            }
+        }
+
+    }
+
 //    public void kingMove() {
 //
 //        // Get the two movement cases
@@ -398,7 +535,6 @@ public class Game {
             turn = 'w';
         resetPlayerMove();
         generatePossibleMoves();
-
     }
 
 

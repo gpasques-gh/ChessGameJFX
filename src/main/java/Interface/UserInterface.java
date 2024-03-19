@@ -31,7 +31,7 @@ public class UserInterface extends Application {
         Board board = game.getBoard();
         // Variables for creating the board
         int count = 0;
-        double s = 100;
+        double s = 50;
         // Going through the board
         for (int i = 0; i < 8; i++) {
             count++;
